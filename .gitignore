@@ -1,0 +1,4 @@
+.*
+!.gitignore
+!.*rc*
+node_modules/
