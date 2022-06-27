@@ -1,4 +1,5 @@
 const { Task } = require('../models');
+const createError = require('http-errors');
 
 module.exports.createTask = async (req, res, next) => {
   try {
@@ -32,8 +33,11 @@ module.exports.findTaskById = async (req, res, next) => {
 
     const taskById = await Task.findByPk(id);
 
-    res.send({ data: taskById });
+    if (!taskById) {
+      return next(createError(404, 'Task not found'));
+    }
 
+    res.send({ data: taskById });
   } catch (error) {
     next(error)
   }
@@ -49,7 +53,7 @@ module.exports.updateTask = async (req, res, next) => {
     });
 
     if (rowsUpdated !== 1) {
-      throw new Error('Cant update task!');
+      return next(createError(400, 'Task dont update'))
     }
 
     res.send({ data: task })
@@ -68,7 +72,7 @@ module.exports.deleteTask = async (req, res, next) => {
     })
 
     if (deletedRows !== 1) {
-      throw new Error(`Cant delete task with id ${id}`)
+      return next(createError(404, 'No such task to delete'))
     }
 
     res.send(`Task with id ${id} deleted`);
