@@ -33,6 +33,15 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: true
       }
     },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: true,
+        notEmpty: true,
+        isAlphanumeric: true
+      }
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -52,7 +61,7 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: true,
         isDate: true,
         isValidDate: value => {
-          if(isAfter(new Date(value), new Date())) {
+          if (isAfter(new Date(value), new Date())) {
             throw new Error('Incorrect date value')
           }
         }
