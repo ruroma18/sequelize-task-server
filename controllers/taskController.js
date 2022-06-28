@@ -8,6 +8,10 @@ module.exports.createTask = async (req, res, next) => {
 
     const task = await Task.create(body);
 
+    if(!task) {
+      return next(createError(400, 'Bad request'));
+    }
+
     res.send({ data: task })
   } catch (error) {
     next(error)
@@ -19,6 +23,10 @@ module.exports.findAllTasks = async (req, res, next) => {
 
     const allTasks = await Task.findAll();
 
+    if(!allTasks) {
+      return next(createError(404, 'Tasks not found'));
+    }
+
     res.send({ data: allTasks });
 
   } catch (error) {
@@ -29,15 +37,9 @@ module.exports.findAllTasks = async (req, res, next) => {
 module.exports.findTaskById = async (req, res, next) => {
   try {
 
-    const { params: { id } } = req;
+    const { task } = req;
 
-    const taskById = await Task.findByPk(id);
-
-    if (!taskById) {
-      return next(createError(404, 'Task not found'));
-    }
-
-    res.send({ data: taskById });
+    res.send({ data: task });
   } catch (error) {
     next(error)
   }
@@ -45,18 +47,13 @@ module.exports.findTaskById = async (req, res, next) => {
 
 module.exports.updateTask = async (req, res, next) => {
   try {
-    const { params: { id }, body } = req;
+    const { task, body } = req;
 
-    const [rowsUpdated, [task]] = await Task.update(body, {
-      where: { id },
+    const updatedTask = await task.update(body, {
       returning: true,
     });
 
-    if (rowsUpdated !== 1) {
-      return next(createError(400, 'Task dont update'))
-    }
-
-    res.send({ data: task })
+    res.send({ data: updatedTask })
 
   } catch (error) {
     next(error)
@@ -65,17 +62,11 @@ module.exports.updateTask = async (req, res, next) => {
 
 module.exports.deleteTask = async (req, res, next) => {
   try {
-    const { params: { id } } = req;
+    const { task } = req;
 
-    const deletedRows = await Task.destroy({
-      where: { id }
-    })
+    await task.destroy();
 
-    if (deletedRows !== 1) {
-      return next(createError(404, 'No such task to delete'))
-    }
-
-    res.send(`Task with id ${id} deleted`);
+    res.send({data: task});
 
   } catch (error) {
     next(error)

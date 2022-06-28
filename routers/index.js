@@ -2,15 +2,16 @@ const express = require('express');
 const router = express.Router();
 
 const TaskController = require('../controllers/taskController');
+const { findTask } = require('../middlewares/tasksMW');
 
 router.post('/tasks', TaskController.createTask);
 
 router.get('/tasks', TaskController.findAllTasks);
 
-router.get('/tasks/:id', TaskController.findTaskById);
+router.get('/tasks/:id', findTask, TaskController.findTaskById);
 
-router.put('/tasks/:id', TaskController.updateTask);
+router.put('/tasks/:id', findTask, TaskController.updateTask);
 
-router.delete('/tasks/:id', TaskController.deleteTask);
+router.delete('/tasks/:id', findTask, TaskController.deleteTask);
 
 module.exports = router;
