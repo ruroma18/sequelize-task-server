@@ -1,11 +1,11 @@
-const { Users } = require('../models');
+const { User } = require('../models');
 const createError = require('http-errors');
 
 module.exports.createUser = async (req, res, next) => {
   try {
     const { body } = req;
 
-    const user = await Users.create(body);
+    const user = await User.create(body);
 
     if (!user) {
       return next(createError(400, 'Cant create user'));
@@ -21,7 +21,7 @@ module.exports.createUser = async (req, res, next) => {
 module.exports.findUsers = async (req, res, next) => {
   try {
 
-    const users = await Users.findAll({
+    const users = await User.findAll({
       attributes: {
         exclude: ['password']
       }

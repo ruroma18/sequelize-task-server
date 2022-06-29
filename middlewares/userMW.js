@@ -1,11 +1,11 @@
-const { Users } = require('../models');
+const { User } = require('../models');
 const createError = require('http-errors');
 
 module.exports.findUser = async (req, res, next) => {
   try {
     const { params: { userId } } = req;
 
-    const user = await Users.findByPk(userId, {
+    const user = await User.findByPk(userId, {
       attributes: {
         exclude: ['password']
       }
