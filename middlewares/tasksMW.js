@@ -4,9 +4,9 @@ const createError = require('http-errors');
 module.exports.findTask = async (req, res, next) => {
   try {
 
-    const { params: { id } } = req;
+    const { params: { taskId } } = req;
     
-    const task = await Task.findByPk(id);
+    const task = await Task.findByPk(taskId);
 
     if (!task) {
       return next(createError(404, 'Task not found'));

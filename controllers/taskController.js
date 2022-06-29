@@ -4,11 +4,11 @@ const createError = require('http-errors');
 module.exports.createTask = async (req, res, next) => {
   try {
 
-    const { body } = req;
+    const { user, body } = req;
 
-    const task = await Task.create(body);
+    const task = await user.createTask(body);
 
-    if(!task) {
+    if (!task) {
       return next(createError(400, 'Bad request'));
     }
 
@@ -18,16 +18,18 @@ module.exports.createTask = async (req, res, next) => {
   }
 };
 
-module.exports.findAllTasks = async (req, res, next) => {
+module.exports.findTasks = async (req, res, next) => {
   try {
 
-    const allTasks = await Task.findAll();
+    const { user } = req;
 
-    if(!allTasks) {
+    const foundTasks = await user.getTasks();
+
+    if (!foundTasks) {
       return next(createError(404, 'Tasks not found'));
     }
 
-    res.send({ data: allTasks });
+    res.send({ data: foundTasks });
 
   } catch (error) {
     next(error)
@@ -37,9 +39,11 @@ module.exports.findAllTasks = async (req, res, next) => {
 module.exports.findTaskById = async (req, res, next) => {
   try {
 
-    const { task } = req;
+    const { user: { id: userId }, task: { id: taskId } } = req;
 
-    res.send({ data: task });
+    const foundTask = await Task.findOne({ where: { id: taskId, userId } })
+
+    res.send({ data: foundTask });
   } catch (error) {
     next(error)
   }
@@ -47,11 +51,16 @@ module.exports.findTaskById = async (req, res, next) => {
 
 module.exports.updateTask = async (req, res, next) => {
   try {
-    const { task, body } = req;
+    const { user: { id: userId }, task: { id: taskId }, body } = req;
 
-    const updatedTask = await task.update(body, {
+    const [updatedRow, [updatedTask]] = await Task.update(body, {
+      where: { id: taskId, userId },
       returning: true,
     });
+
+    if (updatedRow !== 1) {
+      return next(createError(404, 'Task not found'));
+    }
 
     res.send({ data: updatedTask })
 
@@ -62,11 +71,15 @@ module.exports.updateTask = async (req, res, next) => {
 
 module.exports.deleteTask = async (req, res, next) => {
   try {
-    const { task } = req;
+    const { user: { id: userId }, task, task: { id: taskId } } = req;
 
-    await task.destroy();
+    const deletedRow = await Task.destroy({ where: { id: taskId, userId } });
 
-    res.send({data: task});
+    if (deletedRow !== 1) {
+      return next(createError(404, 'Task not found'));
+    }
+
+    res.send({ data: task });
 
   } catch (error) {
     next(error)
